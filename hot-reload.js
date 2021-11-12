@@ -1,3 +1,5 @@
+var browser = require("webextension-polyfill");
+
 const filesInDirectory = dir => new Promise (resolve =>
     dir.createReader ().readEntries (entries =>
         Promise.all (entries.filter (e => e.name[0] !== '.').map (e =>
@@ -19,17 +21,17 @@ const watchChanges = (dir, lastTimestamp) => {
         if (!lastTimestamp || (lastTimestamp === timestamp)) {
             setTimeout (() => watchChanges (dir, timestamp), 1000) // retry after 1s
         } else {
-            chrome.runtime.reload ()
+            browser.runtime.reload ()
         }
     })
 }
 
-chrome.management.getSelf (self => {
+browser.management.getSelf (self => {
     if (self.installType === 'development') {
-        chrome.runtime.getPackageDirectoryEntry (dir => watchChanges (dir))
-        chrome.tabs.query ({ active: true, lastFocusedWindow: true }, tabs => { // NB: see https://github.com/xpl/crx-hotreload/issues/5
+        browser.runtime.getPackageDirectoryEntry (dir => watchChanges (dir))
+        browser.tabs.query ({ active: true, lastFocusedWindow: true }, tabs => { // NB: see https://github.com/xpl/crx-hotreload/issues/5
             if (tabs[0]) {
-                chrome.tabs.reload (tabs[0].id)
+                browser.tabs.reload (tabs[0].id)
             }
         })
     }
